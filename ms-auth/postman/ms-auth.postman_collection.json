@@ -1,0 +1,76 @@
+{
+  "info": {
+    "name": "ms-auth",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": { "type": "bearer", "bearer": [ { "key": "token", "value": "{{token}}", "type": "string" } ] },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8081" },
+    { "key": "token", "value": "" },
+    { "key": "userId", "value": "" },
+    { "key": "adminEmail", "value": "admin@silos.com" },
+    { "key": "adminPass", "value": "admin123" }
+  ],
+  "item": [
+    {
+      "name": "1. Registrar usuario de prueba",
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [ "pm.test('201 creado', () => pm.response.to.have.status(201));" ] } } ],
+      "request": { "method": "POST", "auth": { "type": "noauth" }, "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": { "mode": "raw", "raw": "{\"nombre\":\"Prueba Postman\",\"email\":\"prueba{{$timestamp}}@silos.com\",\"contrasena\":\"clave123\",\"fechaNacimiento\":\"1995-05-10\",\"rol\":\"OPERADOR\"}" },
+        "url": "{{baseUrl}}/api/auth/register" }
+    },
+    {
+      "name": "2. Login operador",
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [ "pm.test('200 ok', () => pm.response.to.have.status(200));", "pm.collectionVariables.set('token', pm.response.json().token);" ] } } ],
+      "request": { "method": "POST", "auth": { "type": "noauth" }, "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": { "mode": "raw", "raw": "{\"email\":\"operador@silos.com\",\"contrasena\":\"operador123\",\"rol\":\"OPERADOR\"}" },
+        "url": "{{baseUrl}}/api/auth/login" }
+    },
+    {
+      "name": "3. Login con clave incorrecta (401)",
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [ "pm.test('401', () => pm.response.to.have.status(401));" ] } } ],
+      "request": { "method": "POST", "auth": { "type": "noauth" }, "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": { "mode": "raw", "raw": "{\"email\":\"operador@silos.com\",\"contrasena\":\"mala\",\"rol\":\"OPERADOR\"}" },
+        "url": "{{baseUrl}}/api/auth/login" }
+    },
+    {
+      "name": "4. Mi perfil (/me)",
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [ "pm.test('200 ok', () => pm.response.to.have.status(200));" ] } } ],
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/auth/me" }
+    },
+    {
+      "name": "5. Listar usuarios como operador (403)",
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [ "pm.test('403', () => pm.response.to.have.status(403));" ] } } ],
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/usuarios" }
+    },
+    {
+      "name": "6. Login administrador",
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [ "pm.test('200 ok', () => pm.response.to.have.status(200));", "pm.collectionVariables.set('token', pm.response.json().token);" ] } } ],
+      "request": { "method": "POST", "auth": { "type": "noauth" }, "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": { "mode": "raw", "raw": "{\"email\":\"{{adminEmail}}\",\"contrasena\":\"{{adminPass}}\",\"rol\":\"ADMINISTRADOR\"}" },
+        "url": "{{baseUrl}}/api/auth/login" }
+    },
+    {
+      "name": "7. Listar usuarios como admin",
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [ "pm.test('200 ok', () => pm.response.to.have.status(200));", "const u = pm.response.json().find(x => x.email.startsWith('prueba'));", "if (u) { pm.collectionVariables.set('userId', u.id); }" ] } } ],
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/usuarios" }
+    },
+    {
+      "name": "8. Cambiar rol del usuario de prueba",
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [ "pm.test('200 ok', () => pm.response.to.have.status(200));", "pm.test('rol JEFATURA', () => pm.expect(pm.response.json().rol).to.eql('JEFATURA'));" ] } } ],
+      "request": { "method": "PUT", "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": { "mode": "raw", "raw": "{\"rol\":\"JEFATURA\"}" },
+        "url": "{{baseUrl}}/api/usuarios/{{userId}}/rol" }
+    },
+    {
+      "name": "9. Desactivar usuario de prueba",
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [ "pm.test('200 ok', () => pm.response.to.have.status(200));", "pm.test('inactivo', () => pm.expect(pm.response.json().activo).to.eql(false));" ] } } ],
+      "request": { "method": "DELETE", "url": "{{baseUrl}}/api/usuarios/{{userId}}" }
+    },
+    {
+      "name": "10. Reactivar usuario de prueba",
+      "event": [ { "listen": "test", "script": { "type": "text/javascript", "exec": [ "pm.test('200 ok', () => pm.response.to.have.status(200));", "pm.test('activo', () => pm.expect(pm.response.json().activo).to.eql(true));" ] } } ],
+      "request": { "method": "PUT", "url": "{{baseUrl}}/api/usuarios/{{userId}}/activar" }
+    }
+  ]
+}
