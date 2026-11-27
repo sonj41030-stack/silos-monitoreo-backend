@@ -7,7 +7,6 @@ Repositorio de la app: https://github.com/sonj41030-stack/silos-monitoreo-androi
 ## Integrantes
 
 - Edixon Cabriless (sonj41030-stack)
-- REEMPLAZAR: nombre y usuario de GitHub del segundo integrante
 
 ## Microservicios
 
