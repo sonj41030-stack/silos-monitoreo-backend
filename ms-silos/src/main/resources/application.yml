@@ -1,0 +1,18 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: ms-silos
+  datasource:
+    url: "jdbc:mysql://localhost:3306/silos_core_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+    username: root
+    password: ${DB_PASSWORD:root1234}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:silos-monitoreo-clave-secreta-de-al-menos-32-bytes-2026}
