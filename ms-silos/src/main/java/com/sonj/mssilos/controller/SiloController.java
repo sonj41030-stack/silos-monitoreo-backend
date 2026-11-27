@@ -1,5 +1,6 @@
 package com.sonj.mssilos.controller;
 
+import com.sonj.mssilos.dto.AjusteSiloRequest;
 import com.sonj.mssilos.dto.SiloRequest;
 import com.sonj.mssilos.dto.SiloResponse;
 import com.sonj.mssilos.service.SiloService;
@@ -55,5 +56,12 @@ public class SiloController {
     @Operation(summary = "Elimina un silo, borrado logico (solo administrador)")
     public void eliminar(@PathVariable String id) {
         service.eliminarSilo(id);
+    }
+
+    @PostMapping("/{id}/movimientos")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','OPERADOR')")
+    @Operation(summary = "Ajusta el nivel del silo con una ENTRADA o SALIDA en kilos")
+    public SiloResponse ajustar(@PathVariable String id, @RequestBody AjusteSiloRequest req) {
+        return service.ajustarSilo(id, req);
     }
 }
